@@ -1,0 +1,61 @@
+name: Publish to npm
+
+# Publishes @kulesy/annotator to npm whenever a version tag is pushed.
+#
+# Uses npm Trusted Publishing — authenticates to npm via GitHub Actions OIDC,
+# no long-lived NPM_TOKEN required. Configure the trusted publisher once on
+# npmjs.com (see README "Releasing" section) and tag-push from any clone:
+#
+#   npm version patch -m "Release v%s"   # bump 0.1.0 → 0.1.1
+#   git push --follow-tags                # pushes commit + tag
+#
+# Every publish gets a provenance attestation (the green "Built and signed
+# on GitHub Actions" badge on npmjs.com) so consumers can verify the tarball
+# came from this repo + commit.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'           # SemVer tags: v0.1.0, v1.2.3, v2.0.0-beta.1, etc.
+
+permissions:
+  contents: read           # default
+  id-token: write          # required for OIDC -> npm Trusted Publishing
+  attestations: write      # required for --provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo at tagged commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Verify tag matches package.json version
+        # Fails fast if someone tags v0.2.0 without bumping package.json — npm
+        # would publish 0.1.0 again, which it'd reject anyway, but better to
+        # catch it before burning a workflow minute.
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION=${GITHUB_REF_NAME#v}
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+          echo "Publishing v$PKG_VERSION"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        # `prepublishOnly` would also run this, but doing it as a separate step
+        # makes the failure obvious in the Actions UI.
+        run: npm run build
+
+      - name: Publish to npm with provenance
+        run: npm publish --access public --provenance

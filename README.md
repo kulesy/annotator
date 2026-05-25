@@ -40,7 +40,7 @@ export default function Root() {
 
 ```astro
 ---
-import { Annotator } from '@kulesy/annotator/astro';
+import Annotator from '@kulesy/annotator/astro';
 ---
 
 <html>
@@ -211,6 +211,30 @@ initAnnotator({ skipCssInjection: true, /* ...rest */ });
 - On 401, prompts the user for a password and retries
 - Loads existing annotations for the current path on mount
 - "View on GitHub" toolbar link opens the issues page
+
+## Releasing
+
+Publishes happen from GitHub Actions via [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers) — no long-lived `NPM_TOKEN` anywhere. The workflow is at [`.github/workflows/publish.yml`](.github/workflows/publish.yml).
+
+**To cut a release:**
+
+```bash
+npm version patch -m "Release v%s"   # 0.1.0 → 0.1.1 (or minor / major)
+git push --follow-tags                # triggers the publish workflow
+```
+
+The Action verifies the tag matches `package.json`, builds, and runs `npm publish --access public --provenance`. The provenance attestation shows up as a green badge on the package page on npmjs.com — consumers can verify the tarball was built from this exact repo + commit.
+
+**One-time setup** (already done — record only):
+
+1. Generate a Classic Automation token, do the first publish (`v0.1.0`) manually with it
+2. On npmjs.com → package settings → **Publishing access** → **Add Trusted Publisher**:
+   - Repository owner: `kulesy`
+   - Repository name: `annotator`
+   - Workflow filename: `publish.yml`
+   - Environment: *(leave blank)*
+3. Revoke the Automation token
+4. All future tag-push publishes go through OIDC
 
 ## License
 
