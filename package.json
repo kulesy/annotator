@@ -1,0 +1,71 @@
+{
+  "name": "@kulesy/annotator",
+  "version": "0.1.0",
+  "description": "Floating in-browser annotation tool that posts to GitHub Issues. Click any element, leave a comment. Framework-agnostic core with React and Astro wrappers.",
+  "type": "module",
+  "main": "./dist/core.js",
+  "module": "./dist/core.js",
+  "types": "./dist/core.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/core.d.ts",
+      "default": "./dist/core.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "default": "./dist/react.js"
+    },
+    "./astro": "./src/astro/Annotator.astro",
+    "./api": {
+      "types": "./dist/api.d.ts",
+      "default": "./dist/api.js"
+    },
+    "./styles.css": "./src/styles.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src/astro",
+    "src/styles.css",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "annotation",
+    "feedback",
+    "review",
+    "github-issues",
+    "comments",
+    "react",
+    "astro",
+    "vercel"
+  ],
+  "author": "Eli Kent <kulewidak@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kulesy/annotator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kulesy/annotator/issues"
+  },
+  "homepage": "https://github.com/kulesy/annotator#readme",
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "react": "^18.3.0",
+    "typescript": "^5.5.0"
+  }
+}

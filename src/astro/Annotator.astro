@@ -1,0 +1,51 @@
+---
+/**
+ * Astro wrapper around `@kulesy/annotator`.
+ *
+ * Usage:
+ *
+ *   ---
+ *   import { Annotator } from '@kulesy/annotator/astro';
+ *   ---
+ *   <Annotator
+ *     enabled={import.meta.env.PUBLIC_SHOW_ANNOTATOR === 'true'}
+ *     endpoint="/api/annotations"
+ *     viewIssuesUrl="https://github.com/me/repo/labels/annotation"
+ *     accentColor="#008a52"
+ *   />
+ *
+ * All props mirror the `AnnotatorConfig` interface from `@kulesy/annotator`.
+ * The component renders no DOM itself — the UI mounts to `document.body` at
+ * runtime so it escapes any container's overflow/clip.
+ */
+
+export interface Props {
+  enabled?: boolean;
+  endpoint?: string;
+  mode?: 'auto' | 'local' | 'api';
+  authToken?: string;
+  viewIssuesUrl?: string;
+  accentColor?: string;
+  accentColorDeep?: string;
+  toggleBackground?: string;
+  label?: string;
+  scopeSelector?: string;
+  localStorageKey?: string;
+  tokenStorageKey?: string;
+}
+
+const { enabled = true, ...config } = Astro.props;
+---
+
+{enabled && (
+  <>
+    {/* Stash config on window so the module script (no Astro `define:vars`
+        on module-type scripts) can read it. */}
+    <script is:inline set:html={`window.__ANNOTATOR_CONFIG__ = ${JSON.stringify(config)};`} />
+    <script>
+      import { initAnnotator } from '@kulesy/annotator';
+      const cfg = (window as any).__ANNOTATOR_CONFIG__ ?? {};
+      initAnnotator(cfg);
+    </script>
+  </>
+)}
