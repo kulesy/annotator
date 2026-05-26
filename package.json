@@ -1,6 +1,6 @@
 {
   "name": "@kulesy/annotator",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Floating in-browser annotation tool that posts to GitHub Issues. Click any element, leave a comment. Framework-agnostic core with React and Astro wrappers.",
   "type": "module",
   "main": "./dist/core.js",
